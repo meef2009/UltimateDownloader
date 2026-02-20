@@ -1,5 +1,5 @@
 #define MyAppName "UltimateDownloader"
-#define MyAppVersion "1.0.6"
+#define MyAppVersion "1.0.7"
 #define MyAppPublisher "MyCompany"
 #define MyAppExeName "UltimateDownloader.exe"
 #define MyUpdaterExe "UltimateDownloaderUpdater.exe"

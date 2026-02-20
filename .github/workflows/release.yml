@@ -1,9 +1,9 @@
-name: Build & Release (Windows)
+name: build-release
 
 on:
   push:
     tags:
-      - "v*"
+      - "v*.*.*"
 
 permissions:
   contents: write
@@ -15,150 +15,108 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install deps
-        shell: pwsh
+      - name: Install Python deps
         run: |
           python -m pip install --upgrade pip
-          if (Test-Path "requirements.txt") {
-            pip install -r requirements.txt
-          }
-          pip install pyinstaller
+          pip install pyinstaller requests customtkinter
 
-      # ----------------------------
-      # Build app exe
-      # ----------------------------
-      - name: Build UltimateDownloader.exe (PyInstaller)
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup --yes
+
+      - name: Extract version from tag
+        id: ver
         shell: pwsh
         run: |
-          if (Test-Path "main.spec") {
-            pyinstaller main.spec --noconfirm
-          } else {
-            pyinstaller .\main.py --onefile --windowed --name UltimateDownloader --noconfirm
-          }
-          if (!(Test-Path "dist\UltimateDownloader.exe")) {
-            throw "dist\UltimateDownloader.exe not found after build"
-          }
-
-      # ----------------------------
-      # Build updater exe
-      # ----------------------------
-      - name: Build UltimateDownloaderUpdater.exe (PyInstaller)
-        shell: pwsh
-        run: |
-          if (Test-Path "UltimateDownloaderUpdater.spec") {
-            pyinstaller UltimateDownloaderUpdater.spec --noconfirm
-          } elseif (Test-Path "updater.spec") {
-            pyinstaller updater.spec --noconfirm
-          } else {
-            pyinstaller .\updater\updater.py --onefile --windowed --name UltimateDownloaderUpdater --noconfirm
-          }
-          if (!(Test-Path "dist\UltimateDownloaderUpdater.exe")) {
-            throw "dist\UltimateDownloaderUpdater.exe not found after build"
-          }
-
-      # ----------------------------
-      # Install Inno Setup (via Chocolatey) if missing
-      # ----------------------------
-      - name: Ensure Inno Setup (iscc.exe)
-        shell: pwsh
-        run: |
-          $iscc = Get-Command "iscc.exe" -ErrorAction SilentlyContinue
-          if (-not $iscc) {
-            choco install innosetup -y
-          }
-          iscc.exe /?
-
-      # ----------------------------
-      # Compile installer.iss
-      # ----------------------------
-      - name: Compile installer.iss (Inno)
-        shell: pwsh
-        run: |
-          if (!(Test-Path "installer.iss")) { throw "installer.iss not found" }
-          iscc.exe installer.iss
-
-      # ----------------------------
-      # Detect version from tag and setup exe name
-      # ----------------------------
-      - name: Detect installer output
-        id: detect
-        shell: pwsh
-        run: |
-          $tag = "${{ github.ref_name }}"      # v1.0.3
-          $ver = $tag.TrimStart("v")           # 1.0.3
-
-          # Inno outputs to installer_output by your script
-          if (!(Test-Path "installer_output")) { throw "installer_output folder not found" }
-
-          $setup = Get-ChildItem -Path "installer_output" -Filter "*_Setup_$ver*.exe" | Select-Object -First 1
-          if (-not $setup) {
-            # fallback: any exe with version inside
-            $setup = Get-ChildItem -Path "installer_output" -Filter "*.exe" | Where-Object { $_.Name -match $ver } | Select-Object -First 1
-          }
-          if (-not $setup) { throw "Setup exe for version $ver not found in installer_output" }
-
+          $tag = "${env:GITHUB_REF_NAME}"
+          $v = $tag.TrimStart("v")
           echo "tag=$tag" >> $env:GITHUB_OUTPUT
-          echo "ver=$ver" >> $env:GITHUB_OUTPUT
-          echo "setup_path=$($setup.FullName)" >> $env:GITHUB_OUTPUT
-          echo "setup_name=$($setup.Name)" >> $env:GITHUB_OUTPUT
+          echo "version=$v" >> $env:GITHUB_OUTPUT
 
-      # ----------------------------
-      # Compute SHA256 for setup
-      # ----------------------------
+      # ---------- BUILD MAIN ----------
+      - name: Build UltimateDownloader.exe
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --onefile --noconsole --name UltimateDownloader main.py
+
+      # ---------- BUILD UPDATER ----------
+      - name: Build UltimateDownloaderUpdater.exe
+        shell: pwsh
+        run: |
+          if (Test-Path ".\updater\updater.py") {
+            pyinstaller --noconfirm --onefile --noconsole --name UltimateDownloaderUpdater updater\updater.py
+          } else {
+            pyinstaller --noconfirm --onefile --noconsole --name UltimateDownloaderUpdater updater.py
+          }
+
+      # ---------- PREPARE DIST ----------
+      - name: Prepare dist for Inno
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path ".\dist"
+
+          Copy-Item ".\dist\UltimateDownloader.exe" ".\dist\UltimateDownloader.exe" -Force
+          Copy-Item ".\dist\UltimateDownloaderUpdater.exe" ".\dist\UltimateDownloaderUpdater.exe" -Force
+
+      # ---------- COMPILE INSTALLER ----------
+      - name: Compile installer
+        shell: pwsh
+        run: |
+          iscc installer.iss
+
+      # ---------- FIND SETUP ----------
+      - name: Locate Setup
+        id: setup
+        shell: pwsh
+        run: |
+          $setup = Get-ChildItem -Recurse -Filter "*.exe" |
+            Where-Object { $_.FullName -match "installer_output" -or $_.Name -match "Setup" } |
+            Sort-Object LastWriteTime -Descending |
+            Select-Object -First 1
+
+          if (-not $setup) { throw "Setup.exe not found" }
+
+          echo "path=$($setup.FullName)" >> $env:GITHUB_OUTPUT
+          echo "name=$($setup.Name)" >> $env:GITHUB_OUTPUT
+
       - name: Compute SHA256
         id: sha
         shell: pwsh
         run: |
-          $p = "${{ steps.detect.outputs.setup_path }}"
-          $h = (Get-FileHash $p -Algorithm SHA256).Hash.ToLower()
-          echo "sha256=$h" >> $env:GITHUB_OUTPUT
+          $hash = (Get-FileHash -Algorithm SHA256 "${{ steps.setup.outputs.path }}").Hash.ToLower()
+          echo "sha256=$hash" >> $env:GITHUB_OUTPUT
 
-      # ----------------------------
-      # Create GitHub Release + upload setup
-      # ----------------------------
-      - name: Create Release (upload setup)
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.detect.outputs.tag }}
-          name: ${{ steps.detect.outputs.tag }}
-          files: |
-            ${{ steps.detect.outputs.setup_path }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # ----------------------------
-      # Update latest.json in main
-      # ----------------------------
-      - name: Update latest.json (commit to main)
+      - name: Generate latest.json
         shell: pwsh
         run: |
-          $tag = "${{ steps.detect.outputs.tag }}"
-          $ver = "${{ steps.detect.outputs.ver }}"
-          $setupName = "${{ steps.detect.outputs.setup_name }}"
+          $ver = "${{ steps.ver.outputs.version }}"
+          $tag = "${{ steps.ver.outputs.tag }}"
+          $setupName = "${{ steps.setup.outputs.name }}"
           $sha = "${{ steps.sha.outputs.sha256 }}"
+          $repo = "${env:GITHUB_REPOSITORY}"
 
-          $setupUrl = "https://github.com/${{ github.repository }}/releases/download/$tag/$setupName"
+          $setupUrl = "https://github.com/$repo/releases/download/$tag/$setupName"
 
           $obj = @{
-            version = $ver
+            version   = $ver
             setup_url = $setupUrl
-            sha256 = $sha
+            sha256    = $sha
           }
 
-          $json = $obj | ConvertTo-Json -Depth 5
-          Set-Content -Path "latest.json" -Value $json -Encoding UTF8
+          $json = $obj | ConvertTo-Json -Depth 3
+          $json | Out-File -Encoding utf8 ".\latest.json"
 
-          git config user.name "github-actions"
-          git config user.email "actions@users.noreply.github.com"
-
-          git add latest.json
-          git commit -m "Update latest.json to $ver" || exit 0
-          git push origin HEAD:main
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: ${{ steps.ver.outputs.tag }}
+          files: |
+            ${{ steps.setup.outputs.path }}
+            latest.json

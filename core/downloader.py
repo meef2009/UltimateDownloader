@@ -1,6 +1,6 @@
 import os
 from yt_dlp import YoutubeDL
-from app.logger import log
+from core.logger import log
 
 class Downloader:
 

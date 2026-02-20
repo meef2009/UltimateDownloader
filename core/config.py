@@ -2,49 +2,31 @@ import os
 import json
 
 APP_NAME = "UltimateDownloader"
-DEFAULT_CONFIG = {
-    "theme": "dark",
-    "language": "ru",
-    "download_path": "",
-}
 
+def get_config_path():
+    base_dir = os.path.join(
+        os.environ.get("LOCALAPPDATA", os.path.expanduser("~")),
+        APP_NAME
+    )
+    os.makedirs(base_dir, exist_ok=True)
+    return os.path.join(base_dir, "config.json")
 
-def get_config_dir() -> str:
-    # %APPDATA%\UltimateDownloader
-    base = os.environ.get("APPDATA") or os.path.expanduser("~")
-    return os.path.join(base, APP_NAME)
+def load_config():
+    path = get_config_path()
 
+    if not os.path.exists(path):
+        default_config = {
+            "language": "en",
+            "download_path": os.path.join(os.path.expanduser("~"), "Downloads")
+        }
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(default_config, f, indent=4)
+        return default_config
 
-def get_config_path() -> str:
-    return os.path.join(get_config_dir(), "config.json")
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-
-def load_config() -> dict:
-    cfg_dir = get_config_dir()
-    cfg_path = get_config_path()
-
-    os.makedirs(cfg_dir, exist_ok=True)
-
-    if not os.path.exists(cfg_path):
-        save_config(DEFAULT_CONFIG)
-        return DEFAULT_CONFIG.copy()
-
-    try:
-        with open(cfg_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        # на всякий случай подмешаем дефолты
-        merged = DEFAULT_CONFIG.copy()
-        merged.update(data if isinstance(data, dict) else {})
-        return merged
-    except Exception:
-        # если файл битый — перезапишем дефолтом
-        save_config(DEFAULT_CONFIG)
-        return DEFAULT_CONFIG.copy()
-
-
-def save_config(cfg: dict) -> None:
-    cfg_dir = get_config_dir()
-    cfg_path = get_config_path()
-    os.makedirs(cfg_dir, exist_ok=True)
-    with open(cfg_path, "w", encoding="utf-8") as f:
-        json.dump(cfg, f, ensure_ascii=False, indent=2)
+def save_config(config):
+    path = get_config_path()
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(config, f, indent=4)

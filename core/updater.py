@@ -1,48 +1,43 @@
-import os, sys, shutil, hashlib, requests, subprocess, tempfile
-from core import logger
+import os
+import sys
+import requests
+import subprocess
+from version import VERSION
 
-APP_PATH = r"C:\Program Files\UltimateDownloader"
-UPDATE_JSON = "https://yourserver.com/latest.json"
+# ВСТАВЬ СЮДА ССЫЛКУ НА RAW latest.json
+LATEST_JSON_URL = "https://raw.githubusercontent.com/meef2009/UltimateDownloader/refs/heads/main/latest.json"
 
-def sha256(file_path):
-    h = hashlib.sha256()
-    with open(file_path,"rb") as f:
-        while chunk := f.read(8192):
-            h.update(chunk)
-    return h.hexdigest()
 
-def download_file(url, dest):
-    r = requests.get(url, stream=True)
-    with open(dest,"wb") as f:
-        for chunk in r.iter_content(8192):
-            f.write(chunk)
+def parse_version(v: str):
+    return tuple(int(x) for x in v.strip().split("."))
 
-def rollback(backup_path):
-    shutil.copytree(backup_path, APP_PATH, dirs_exist_ok=True)
-    logger.log("Rollback complete")
 
-def main():
-    data = requests.get(UPDATE_JSON).json()
-    url = data["url"]
-    expected_hash = data["sha256"]
+def fetch_latest():
+    r = requests.get(LATEST_JSON_URL, timeout=10)
+    r.raise_for_status()
+    data = r.json()
+    return data["version"], data["setup_url"], data["sha256"]
 
-    tmp_file = os.path.join(tempfile.gettempdir(),"update.tmp")
-    download_file(url,tmp_file)
 
-    if sha256(tmp_file) != expected_hash:
-        logger.log("Hash mismatch! Abort update")
-        sys.exit(1)
-
-    backup = APP_PATH + "_backup"
-    shutil.copytree(APP_PATH, backup, dirs_exist_ok=True)
-
+def is_update_available(latest: str) -> bool:
     try:
-        shutil.unpack_archive(tmp_file, APP_PATH)
+        return parse_version(latest) > parse_version(VERSION)
     except:
-        rollback(backup)
-        sys.exit(1)
+        return False
 
-    subprocess.Popen(os.path.join(APP_PATH,"UltimateDownloader.exe"))
 
-if __name__=="__main__":
-    main()
+def get_app_dir():
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(""))
+
+
+def start_update(setup_url: str, sha256: str) -> bool:
+    app_dir = get_app_dir()
+    updater_path = os.path.join(app_dir, "UltimateDownloaderUpdater.exe")
+
+    if not os.path.exists(updater_path):
+        return False
+
+    subprocess.Popen([updater_path, setup_url, sha256], close_fds=True)
+    return True

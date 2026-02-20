@@ -1,5 +1,5 @@
 #define MyAppName "UltimateDownloader"
-#define MyAppVersion "1.0.4"
+#define MyAppVersion "1.0.5"
 #define MyAppPublisher "MyCompany"
 #define MyAppExeName "UltimateDownloader.exe"
 #define MyUpdaterExe "UltimateDownloaderUpdater.exe"
@@ -60,3 +60,15 @@ Filename: "{app}\{#MyAppExeName}"; Description: "Launch {#MyAppName}"; Flags: no
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}"
+
+[Code]
+function InitializeSetup(): Boolean;
+var
+  ResultCode: Integer;
+begin
+  // Если приложение запущено — попросим закрыть
+  // /SILENT обновления тоже должны уметь закрывать приложение
+  Exec('taskkill', '/F /IM "{#MyAppExeName}"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('taskkill', '/F /IM "{#MyUpdaterExe}"', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Result := True;
+end;

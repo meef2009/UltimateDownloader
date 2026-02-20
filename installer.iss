@@ -1,5 +1,5 @@
   #define MyAppName "UltimateDownloader"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.0.2"
 #define MyAppPublisher "MyCompany"
 #define MyAppExeName "UltimateDownloader.exe"
 
@@ -18,7 +18,7 @@ WizardStyle=modern
 PrivilegesRequired=admin
 DisableProgramGroupPage=yes
 UninstallDisplayIcon={app}\{#MyAppExeName}
-ArchitecturesInstallIn64BitMode=x64
+ArchitecturesInstallIn64BitMode=x64compatible
 SetupLogging=yes
 CloseApplications=yes
 RestartApplications=no

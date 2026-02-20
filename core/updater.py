@@ -1,11 +1,11 @@
+# core/updater.py
 import os
 import sys
 import requests
 import subprocess
 from version import VERSION
 
-# ВСТАВЬ СЮДА ССЫЛКУ НА RAW latest.json
-LATEST_JSON_URL = "https://raw.githubusercontent.com/meef2009/UltimateDownloader/refs/heads/main/latest.json"
+LATEST_JSON_URL = "https://raw.githubusercontent.com/meef2009/UltimateDownloader/main/latest.json"
 
 
 def parse_version(v: str):
@@ -27,15 +27,16 @@ def is_update_available(latest: str) -> bool:
 
 
 def get_app_dir():
+    # когда запущено как .exe
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
-    return os.path.dirname(os.path.abspath(""))
+    # когда запускаешь python main.py
+    return os.path.dirname(os.path.abspath("main.py"))
 
 
 def start_update(setup_url: str, sha256: str) -> bool:
     app_dir = get_app_dir()
     updater_path = os.path.join(app_dir, "UltimateDownloaderUpdater.exe")
-
     if not os.path.exists(updater_path):
         return False
 

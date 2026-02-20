@@ -6578,6 +6578,7 @@ imported by:
  &#8226;   <a href="#core.config">core.config</a>
  &#8226;   <a href="#core.language">core.language</a>
  &#8226;   <a href="#core.player">core.player</a>
+ &#8226;   <a href="#core.updater">core.updater</a>
  &#8226;   <a href="#core.youtube_search">core.youtube_search</a>
 
   </div>
@@ -6633,7 +6634,6 @@ imports:
   <div class="import">
 imported by:
     <a href="#ui.app">ui.app</a>
- &#8226;   <a href="#ui.sidebar">ui.sidebar</a>
 
   </div>
 
@@ -6646,6 +6646,27 @@ imported by:
 imports:
     <a href="#core">core</a>
  &#8226;   <a href="#pygame">pygame</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.app">ui.app</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="core.updater"></a>
+  <a target="code" href="///C:/Users/PC/Desktop/UltimateDownloader/core/updater.py" type="text/plain"><tt>core.updater</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#core">core</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#requests">requests</a>
+ &#8226;   <a href="#subprocess">subprocess</a>
+ &#8226;   <a href="#sys">sys</a>
+ &#8226;   <a href="#version">version</a>
 
   </div>
   <div class="import">
@@ -16065,6 +16086,7 @@ imported by:
  &#8226;   <a href="#contextlib">contextlib</a>
  &#8226;   <a href="#core.accounts">core.accounts</a>
  &#8226;   <a href="#core.config">core.config</a>
+ &#8226;   <a href="#core.updater">core.updater</a>
  &#8226;   <a href="#ctypes">ctypes</a>
  &#8226;   <a href="#ctypes._aix">ctypes._aix</a>
  &#8226;   <a href="#ctypes.macholib.dyld">ctypes.macholib.dyld</a>
@@ -16169,6 +16191,7 @@ imported by:
  &#8226;   <a href="#threading">threading</a>
  &#8226;   <a href="#tkinter">tkinter</a>
  &#8226;   <a href="#tkinter.filedialog">tkinter.filedialog</a>
+ &#8226;   <a href="#ui.app">ui.app</a>
  &#8226;   <a href="#urllib.request">urllib.request</a>
  &#8226;   <a href="#urllib3.connection">urllib3.connection</a>
  &#8226;   <a href="#urllib3.contrib.emscripten.connection">urllib3.contrib.emscripten.connection</a>
@@ -20249,7 +20272,8 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#requests">requests</a>
+    <a href="#core.updater">core.updater</a>
+ &#8226;   <a href="#requests">requests</a>
  &#8226;   <a href="#requests.__version__">requests.__version__</a>
  &#8226;   <a href="#requests._internal_utils">requests._internal_utils</a>
  &#8226;   <a href="#requests.adapters">requests.adapters</a>
@@ -21457,6 +21481,7 @@ imported by:
  &#8226;   <a href="#asyncio.subprocess">asyncio.subprocess</a>
  &#8226;   <a href="#asyncio.unix_events">asyncio.unix_events</a>
  &#8226;   <a href="#asyncio.windows_utils">asyncio.windows_utils</a>
+ &#8226;   <a href="#core.updater">core.updater</a>
  &#8226;   <a href="#ctypes._aix">ctypes._aix</a>
  &#8226;   <a href="#ctypes.util">ctypes.util</a>
  &#8226;   <a href="#darkdetect._linux_detect">darkdetect._linux_detect</a>
@@ -21539,6 +21564,7 @@ imported by:
  &#8226;   <a href="#collections">collections</a>
  &#8226;   <a href="#concurrent.futures.process">concurrent.futures.process</a>
  &#8226;   <a href="#contextlib">contextlib</a>
+ &#8226;   <a href="#core.updater">core.updater</a>
  &#8226;   <a href="#ctypes">ctypes</a>
  &#8226;   <a href="#ctypes._aix">ctypes._aix</a>
  &#8226;   <a href="#ctypes._endian">ctypes._endian</a>
@@ -21696,6 +21722,7 @@ imported by:
  &#8226;   <a href="#traceback">traceback</a>
  &#8226;   <a href="#types">types</a>
  &#8226;   <a href="#typing">typing</a>
+ &#8226;   <a href="#ui.app">ui.app</a>
  &#8226;   <a href="#urllib.parse">urllib.parse</a>
  &#8226;   <a href="#urllib.request">urllib.request</a>
  &#8226;   <a href="#urllib3">urllib3</a>
@@ -22159,6 +22186,7 @@ imported by:
  &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
  &#8226;   <a href="#tkinter.simpledialog">tkinter.simpledialog</a>
  &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
+ &#8226;   <a href="#ui.app">ui.app</a>
 
   </div>
 
@@ -22268,6 +22296,7 @@ imports:
 imported by:
     <a href="#tkinter">tkinter</a>
  &#8226;   <a href="#tkinter.simpledialog">tkinter.simpledialog</a>
+ &#8226;   <a href="#ui.app">ui.app</a>
 
   </div>
 
@@ -22842,14 +22871,20 @@ imports:
     <a href="#core.config">core.config</a>
  &#8226;   <a href="#core.language">core.language</a>
  &#8226;   <a href="#core.player">core.player</a>
+ &#8226;   <a href="#core.updater">core.updater</a>
  &#8226;   <a href="#core.youtube_search">core.youtube_search</a>
  &#8226;   <a href="#ctypes">ctypes</a>
  &#8226;   <a href="#customtkinter">customtkinter</a>
+ &#8226;   <a href="#os">os</a>
+ &#8226;   <a href="#sys">sys</a>
+ &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
  &#8226;   <a href="#ui">ui</a>
  &#8226;   <a href="#ui.animations">ui.animations</a>
  &#8226;   <a href="#ui.login_window">ui.login_window</a>
  &#8226;   <a href="#ui.settings_window">ui.settings_window</a>
  &#8226;   <a href="#ui.sidebar">ui.sidebar</a>
+ &#8226;   <a href="#version">version</a>
 
   </div>
   <div class="import">
@@ -22891,6 +22926,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#ui.app">ui.app</a>
+ &#8226;   <a href="#ui.sidebar">ui.sidebar</a>
 
   </div>
 
@@ -22901,9 +22937,9 @@ imported by:
   <a target="code" href="///C:/Users/PC/Desktop/UltimateDownloader/ui/sidebar.py" type="text/plain"><tt>ui.sidebar</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#core.language">core.language</a>
- &#8226;   <a href="#customtkinter">customtkinter</a>
+    <a href="#customtkinter">customtkinter</a>
  &#8226;   <a href="#ui">ui</a>
+ &#8226;   <a href="#ui.settings_window">ui.settings_window</a>
 
   </div>
   <div class="import">
@@ -24466,6 +24502,18 @@ imported by:
  &#8226;   <a href="#yt_dlp.extractor.wrestleuniverse">yt_dlp.extractor.wrestleuniverse</a>
  &#8226;   <a href="#yt_dlp.extractor.zattoo">yt_dlp.extractor.zattoo</a>
  &#8226;   <a href="#yt_dlp.extractor.zee5">yt_dlp.extractor.zee5</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="version"></a>
+  <a target="code" href="///C:/Users/PC/Desktop/UltimateDownloader/version.py" type="text/plain"><tt>version</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imported by:
+    <a href="#core.updater">core.updater</a>
+ &#8226;   <a href="#ui.app">ui.app</a>
 
   </div>
 

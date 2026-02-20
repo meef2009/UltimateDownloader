@@ -54,16 +54,7 @@ jobs:
           } else {
             pyinstaller --noconfirm --onefile --noconsole --name UltimateDownloaderUpdater updater.py
           }
-
-      # ---------- PREPARE DIST ----------
-      - name: Prepare dist for Inno
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path ".\dist"
-
-          Copy-Item ".\dist\UltimateDownloader.exe" ".\dist\UltimateDownloader.exe" -Force
-          Copy-Item ".\dist\UltimateDownloaderUpdater.exe" ".\dist\UltimateDownloaderUpdater.exe" -Force
-
+            
       # ---------- COMPILE INSTALLER ----------
       - name: Compile installer
         shell: pwsh
